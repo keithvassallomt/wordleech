@@ -7,6 +7,7 @@ import typing
 from typing import Callable
 from urllib.request import urlopen
 from io import StringIO
+from pathlib import Path
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject
@@ -159,7 +160,8 @@ class LeechWorker(QObject):
 
         url = 'https://github.com/keithvassallomt/maltese_spelling_dict/releases/download/latest/mt_MT.dic'
         self.status_signal.emit('Downloading latest dictionary')
-        length = self.urlretrieve(url, 'mt_MT.dic', self.download_status)
+        save_path = Path.home() / 'mt_MT.dic'
+        length = self.urlretrieve(url, str(save_path), self.download_status)
 
         if length > 0:
             self.callback('mt_MT.dic')

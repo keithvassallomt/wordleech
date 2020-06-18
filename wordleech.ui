@@ -199,7 +199,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>2020 Keith Vassallo &amp; The https://spelling.mt Team</string>
+          <string>v1.0 | 2020 Keith Vassallo</string>
          </property>
         </widget>
        </item>

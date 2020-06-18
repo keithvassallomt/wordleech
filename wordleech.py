@@ -7,11 +7,9 @@
 # WARNING! All changes made in this file will be lost!
 
 
-# noinspection PyUnresolvedReferences
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -133,4 +131,4 @@ class Ui_MainWindow(object):
         self.lbl_new.setText(_translate("MainWindow", "New Words Found"))
         self.lbl_add.setText(_translate("MainWindow", "Words To Add"))
         self.btn_generate.setText(_translate("MainWindow", "Generate Updated Dictionary"))
-        self.label_5.setText(_translate("MainWindow", "2020 Keith Vassallo & The https://spelling.mt Team"))
+        self.label_5.setText(_translate("MainWindow", "v1.0 | 2020 Keith Vassallo"))
