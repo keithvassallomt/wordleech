@@ -111,7 +111,7 @@ class AppWindow(QMainWindow, QObject):
         """
 
         self.dict_file = filename
-        self.ui.lbl_loaded_dict.setText(self.dict_file)
+        self.ui.lbl_loaded_dict.setText(os.path.basename(self.dict_file))
         self.ui.lbl_status.setText('Download complete.')
         self.ui.btn_load_dict.setEnabled(True)
         self.ui.btn_load_source.setEnabled(True)

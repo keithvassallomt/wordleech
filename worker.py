@@ -164,7 +164,7 @@ class LeechWorker(QObject):
         length = self.urlretrieve(url, str(save_path), self.download_status)
 
         if length > 0:
-            self.callback('mt_MT.dic')
+            self.callback(save_path)
 
     def download_status(self, blocks: int, chunk_size: int, total_length: int):
         """
