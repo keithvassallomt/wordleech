@@ -1,0 +1,3 @@
+([('app',
+   '/Users/keith/Documents/Code/Maltese Spelling Dictionary/WordLeech/dist/app',
+   'EXECUTABLE')],)
