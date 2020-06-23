@@ -40,6 +40,7 @@ class LeechWorker(QObject):
         self.new_words: typing.List[str] = []  # List of new words found
         self.callback: typing.Optional[Callable] = None  # Stores callback lambda when called as thread
         self.do_run: bool = True  # Worker stops if set to False
+        self.lang: str = "English"  # Language for status messages
 
     @QtCore.pyqtSlot()
     def load_dict(self):
@@ -48,7 +49,7 @@ class LeechWorker(QObject):
         :return: None
         """
 
-        base_status = 'Ingesting Dictionary: '
+        base_status = 'Ingesting Dictionary: ' if self.lang == "English" else "Jinqara d-Dizzjunarju: "
         self.status_signal.emit(base_status)
 
         dict_length = LeechWorker.file_len(self.target_file)
@@ -62,7 +63,10 @@ class LeechWorker(QObject):
                     count += 1
                     continue
 
-                status = base_status + 'Word {} of {}'.format(count, dict_length)
+                if self.lang == "English":
+                    status = base_status + 'Word {} of {}'.format(count, dict_length)
+                else:
+                    status = base_status + 'Kelma {} minn {}'.format(count, dict_length)
                 self.status_signal.emit(status)
                 self.dict.append(line.strip())
 
@@ -89,7 +93,10 @@ class LeechWorker(QObject):
         file_count = 1
         for target in (target for target in self.target_files if self.do_run):
             with open(target, 'rb') as in_file:
-                base_status = 'Processing source {} of {}'.format(file_count, len(self.target_files))
+                if self.lang == "English":
+                    base_status = 'Processing source {} of {}'.format(file_count, len(self.target_files))
+                else:
+                    base_status = 'Ipproċessar tas-sors {} minn {}'.format(file_count, len(self.target_files))
                 self.status_signal.emit(base_status)
 
                 parser = PDFParser(in_file)
@@ -105,7 +112,10 @@ class LeechWorker(QObject):
 
                 page_count = 1
                 for page in (page for page in page_list if self.do_run):
-                    status = base_status + ': Page {} of {}'.format(page_count, len(page_list))
+                    if self.lang == "English":
+                        status = base_status + ': Paġna {} minn {}'.format(page_count, len(page_list))
+                    else:
+                        status = base_status + ': Page {} of {}'.format(page_count, len(page_list))
                     self.status_signal.emit(status)
                     interpreter.process_page(page)
 
@@ -134,7 +144,10 @@ class LeechWorker(QObject):
 
         word_count = 1
         for word in (word for word in self.source_words if self.do_run):
-            self.status_signal.emit('Checking word {} of {}'.format(word_count, len(self.source_words)))
+            if self.lang == "English":
+                self.status_signal.emit('Checking word {} of {}'.format(word_count, len(self.source_words)))
+            else:
+                self.status_signal.emit('Titqabbel kelma {} minn {}'.format(word_count, len(self.source_words)))
             self.append_word(word)
 
             progress = int(round((word_count / len(self.source_words) * 100)))
@@ -159,7 +172,8 @@ class LeechWorker(QObject):
         """
 
         url = 'https://github.com/keithvassallomt/maltese_spelling_dict/releases/download/latest/mt_MT.dic'
-        self.status_signal.emit('Downloading latest dictionary')
+        stat = 'Downloading latest dictionary' if self.lang == "English" else "Qed jitniżżel dizzjunarju aġġornat"
+        self.status_signal.emit(stat)
         save_path = Path.home() / 'mt_MT.dic'
         length = self.urlretrieve(url, str(save_path), self.download_status)
 
@@ -181,7 +195,11 @@ class LeechWorker(QObject):
         total_size = total_length / 1024 / 1024
         downloaded = (blocks * chunk_size) / 1024 / 1024
         downloaded = total_size if downloaded > total_size else downloaded
-        self.status_signal.emit('Downloaded {0:.2f}MiB of {1:.2f}MiB'.format(downloaded, total_size))
+        if self.lang == "English":
+            download_status = 'Downloaded {0:.2f}MiB of {1:.2f}MiB'.format(downloaded, total_size)
+        else:
+            download_status = 'Niżlu {0:.2f}MiB minn {1:.2f}MiB'.format(downloaded, total_size)
+        self.status_signal.emit(download_status)
 
     def append_word(self, word: str):
         """

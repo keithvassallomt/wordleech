@@ -22,13 +22,75 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="lbl_dict_file">
+         <property name="text">
+          <string>Dictionary File</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="4">
+        <widget class="QLabel" name="lbl_status">
+         <property name="text">
+          <string>Idle</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="btn_download_dict">
+         <property name="text">
+          <string>Download Latest</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4">
+        <widget class="QProgressBar" name="pb_process">
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="btn_load_dict">
+         <property name="text">
+          <string>Browse...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lbl_source_file">
          <property name="text">
           <string>Source File(s)</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="4">
+       <item row="1" column="3">
+        <widget class="QLabel" name="lbl_loaded_dict">
+         <property name="text">
+          <string>No File Loaded.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="btn_load_source">
+         <property name="text">
+          <string>Browse...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="4">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QPushButton" name="btn_reset">
@@ -49,21 +111,7 @@
          </item>
         </layout>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Dictionary File</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="4">
-        <widget class="QProgressBar" name="pb_process">
-         <property name="value">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -76,59 +124,25 @@
          </property>
         </spacer>
        </item>
-       <item row="0" column="4">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="btn_load_dict">
-         <property name="text">
-          <string>Browse...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QLabel" name="lbl_loaded_dict">
-         <property name="text">
-          <string>No File Loaded.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="btn_load_source">
-         <property name="text">
-          <string>Browse...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
+       <item row="2" column="3">
         <widget class="QLabel" name="lbl_loaded_sources">
          <property name="text">
           <string>No Sources Loaded.</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="4">
-        <widget class="QLabel" name="lbl_status">
-         <property name="text">
-          <string>Idle</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="btn_download_dict">
-         <property name="text">
-          <string>Download Latest</string>
-         </property>
+       <item row="0" column="0">
+        <widget class="QComboBox" name="cmb_lang">
+         <item>
+          <property name="text">
+           <string>English</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Malti</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>
@@ -197,7 +211,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="lbl_version">
          <property name="text">
           <string>v1.0 | 2020 Keith Vassallo</string>
          </property>

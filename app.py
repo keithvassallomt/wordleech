@@ -1,6 +1,7 @@
 import os
 import sys
 import typing
+from pathlib import Path
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject
@@ -28,12 +29,16 @@ class AppWindow(QMainWindow, QObject):
         self.download_worker: typing.Optional[LeechWorker] = None  # Used to download latest dictionary
         self.download_thread: typing.Optional[QtCore.QThread] = None
 
+        self.lang: str = "English"  # UI Language
         self.lst_found: typing.List[str] = []  # List of new words found
         self.lst_add: typing.List[str] = []  # List of new words to add to dictionary
+        self.version = "1.0"
+        self.copy_notice = "2020"
 
         self.init_threads()
         self.ui.setupUi(self)
         self.bind_widgets()
+        self.load_lang_pref()
         self.show()
 
     def init_threads(self):
@@ -48,6 +53,7 @@ class AppWindow(QMainWindow, QObject):
             worker = LeechWorker()
             worker.status_signal.connect(self.update_status)
             worker.progress_signal.connect(self.update_progress)
+            worker.lang = self.lang
             setattr(self, task + '_worker', worker)
             setattr(self, task + '_thread', QtCore.QThread(self))
             getattr(self, task + '_worker').moveToThread(getattr(self, task + '_thread'))
@@ -69,6 +75,101 @@ class AppWindow(QMainWindow, QObject):
         self.ui.btn_add.clicked.connect(self.add)
         self.ui.btn_add_all.clicked.connect(self.add_all)
         self.ui.btn_generate.clicked.connect(self.write_dict)
+        self.ui.cmb_lang.currentIndexChanged.connect(self.translate_ui)
+
+    def load_lang_pref(self):
+        """
+        Load the user's language preference from file if available
+        :return: None
+        """
+
+        lang_pref_file = Path.home() / 'WordLeech.prefs'
+
+        if not lang_pref_file.is_file() or not lang_pref_file.stat().st_size > 0:
+            return
+
+        with lang_pref_file.open() as infile:
+            self.lang = infile.read()
+            self.ui.cmb_lang.setCurrentText(self.lang)
+            self.do_translate()
+
+    def translate_ui(self):
+        """
+        Save the user's language preference on change
+        :return: None
+        """
+
+        self.lang = self.ui.cmb_lang.currentText()
+
+        lang_pref_file = Path.home() / 'WordLeech.prefs'
+        with lang_pref_file.open('w') as outfile:
+            outfile.write(self.lang)
+
+        self.do_translate()
+
+    def do_translate(self):
+        """
+        Translate the UI depending on the language chosen.
+        No 'proper' translation mechanism used here due to low number of strings
+        :return: None
+        """
+
+        if self.lang == "English":
+            self.ui.grp_load.setTitle("Load Files")
+            self.ui.lbl_dict_file.setText("Dictionary File")
+            self.ui.lbl_source_file.setText("Source File(s)")
+            self.ui.btn_load_dict.setText("Browse...")
+            self.ui.btn_load_source.setText("Browse...")
+            self.ui.btn_download_dict.setText("Download Latest")
+            self.ui.btn_reset.setText("Reset")
+            self.ui.btn_process.setText("Process")
+            self.ui.grp_results.setTitle("Results")
+            self.ui.lbl_version.setText("v{} | {} Keith Vassallo".format(self.version, self.copy_notice))
+            self.ui.btn_generate.setText("Generate Updated Dictionary")
+
+            if len(self.source_files) == 0:
+                self.ui.lbl_loaded_sources.setText('No Sources Loaded.')
+            if self.dict_file is None:
+                self.ui.lbl_loaded_dict.setText('No File Loaded.')
+
+            total_words = len(self.lst_add) + len(self.lst_found)
+            if len(self.lst_found) == 0:
+                self.ui.lbl_new.setText('New Words Found')
+            else:
+                self.ui.lbl_new.setText('New Words Found ({}/{})'.format(len(self.lst_found), total_words))
+
+            if len(self.lst_add) == 0:
+                self.ui.lbl_add.setText('Words To Add')
+            else:
+                self.ui.lbl_add.setText('Words To Add ({})'.format(len(self.lst_add)))
+        elif self.lang == "Malti":
+            self.ui.grp_load.setTitle("Iftaħ Fajls")
+            self.ui.lbl_dict_file.setText("Fajl tad-Dizzjunarju")
+            self.ui.lbl_source_file.setText("Fajl(s) tas-Sors")
+            self.ui.btn_load_dict.setText("Għażel...")
+            self.ui.btn_load_source.setText("Għażel...")
+            self.ui.btn_download_dict.setText("Niżżel l-Aġġornat")
+            self.ui.btn_reset.setText("Erġa Ibda")
+            self.ui.btn_process.setText("Ipproċessa")
+            self.ui.grp_results.setTitle("Riżultati")
+            self.ui.lbl_version.setText("v{} | {} Keith Vassallo".format(self.version, self.copy_notice))
+            self.ui.btn_generate.setText("Oħloq Dizzjunarju Aġġornat")
+
+            if len(self.source_files) == 0:
+                self.ui.lbl_loaded_sources.setText('L-Ebda Sors Miftuħ.')
+            if self.dict_file is None:
+                self.ui.lbl_loaded_dict.setText('L-Ebda Fajl Miftuħ.')
+
+            total_words = len(self.lst_add) + len(self.lst_found)
+            if len(self.lst_found) == 0:
+                self.ui.lbl_new.setText('Kliem Ġodda Misjuba')
+            else:
+                self.ui.lbl_new.setText('Kliem Ġodda Misjuba ({}/{})'.format(len(self.lst_found), total_words))
+
+            if len(self.lst_add) == 0:
+                self.ui.lbl_add.setText('Kliem Biex Jiżdiedu')
+            else:
+                self.ui.lbl_add.setText('Kliem Biex Jiżdiedu ({})'.format(len(self.lst_add)))
 
     def load_dict(self):
         """
@@ -77,14 +178,16 @@ class AppWindow(QMainWindow, QObject):
         """
 
         options = QFileDialog.Options()
-        filename = QFileDialog.getOpenFileName(self, "Choose Dictionary File", "",
-                                               "Dictionary File (*.dic)", options=options)
+
+        title = "Choose Dictionary File" if self.lang == "English" else "Għażel Fajl tad-Dizzjunarju"
+        filter_text = "Dictionary File (*.dic)" if self.lang == "English" else "Fajl tad-Dizzjunarju (*.dic)"
+        filename = QFileDialog.getOpenFileName(self, title, "", filter_text, options=options)
         if filename and filename[0] != '':
             self.dict_file = str(filename[0])
             self.ui.lbl_loaded_dict.setText(os.path.basename(self.dict_file))
             self.toggle_process()
         else:
-            self.ui.lbl_loaded_dict.setText('No File Loaded.')
+            self.ui.lbl_loaded_dict.setText('No File Loaded.' if self.lang == "English" else "L-Ebda Fajl Miftuħ")
             self.dict_file = None
 
     # noinspection DuplicatedCode
@@ -98,6 +201,7 @@ class AppWindow(QMainWindow, QObject):
         self.ui.btn_load_dict.setEnabled(False)
         self.ui.btn_load_source.setEnabled(False)
         self.download_worker.do_run = True
+        self.download_worker.lang = self.lang
         self.ui.pb_process.setValue(0)
         self.download_worker.callback = self.download_complete
         self.download_thread.started.connect(self.download_worker.download_latest)
@@ -112,7 +216,7 @@ class AppWindow(QMainWindow, QObject):
 
         self.dict_file = filename
         self.ui.lbl_loaded_dict.setText(os.path.basename(self.dict_file))
-        self.ui.lbl_status.setText('Download complete.')
+        self.ui.lbl_status.setText('Download complete.' if self.lang == "English" else "Download lesta.")
         self.ui.btn_load_dict.setEnabled(True)
         self.ui.btn_load_source.setEnabled(True)
         self.toggle_process()
@@ -125,7 +229,8 @@ class AppWindow(QMainWindow, QObject):
 
         self.source_files.clear()
         options = QFileDialog.Options()
-        filenames = QFileDialog.getOpenFileNames(self, "Choose Source Files", "",
+        title = "Choose Source Files" if self.lang == "English" else "Għażel Fajls bis-Sorsi"
+        filenames = QFileDialog.getOpenFileNames(self, title, "",
                                                  "Portable Document Format (*.pdf)", options=options)
 
         index = 0
@@ -142,7 +247,8 @@ class AppWindow(QMainWindow, QObject):
                 self.toggle_process()
             else:
                 self.source_files = []
-                self.ui.lbl_loaded_sources.setText('No Sources Loaded.')
+                self.ui.lbl_loaded_sources.setText(
+                    'No Sources Loaded.' if self.lang == "English" else "L-Ebda Sors Miftuħ")
 
     def toggle_process(self):
         """
@@ -165,6 +271,7 @@ class AppWindow(QMainWindow, QObject):
         self.ui.btn_load_dict.setEnabled(False)
         self.ui.btn_load_source.setEnabled(False)
         self.dict_worker.do_run = True
+        self.dict_worker.lang = self.lang
         self.ui.pb_process.setValue(0)
         self.dict_worker.target_file = self.dict_file
         self.dict_worker.callback = self.process_files_stage_2
@@ -179,6 +286,7 @@ class AppWindow(QMainWindow, QObject):
         """
 
         self.source_worker.do_run = True
+        self.source_worker.lang = self.lang
         self.source_worker.target_files = self.source_files
         self.source_worker.callback = self.do_compare
         self.source_thread.started.connect(self.source_worker.load_source)
@@ -192,6 +300,7 @@ class AppWindow(QMainWindow, QObject):
         """
 
         self.compare_worker.do_run = True
+        self.compare_worker.lang = self.lang
         self.compare_worker.dict = self.dict_worker.dict
         self.compare_worker.source_words = self.source_worker.source_words
         self.compare_worker.callback = self.show_results
@@ -208,8 +317,12 @@ class AppWindow(QMainWindow, QObject):
         self.lst_found = self.compare_worker.new_words
         self.sync_lists()
         self.ui.grp_results.setEnabled(True)
-        self.ui.lbl_new.setText('New Words Found ({})'.format(len(self.compare_worker.new_words)))
-        self.update_status('Files processed.')
+        if self.lang == "English":
+            status = 'New Words Found ({})'.format(len(self.compare_worker.new_words))
+        else:
+            status = 'Kliem Ġodda Misjuba ({})'.format(len(self.compare_worker.new_words))
+        self.ui.lbl_new.setText(status)
+        self.update_status('Files processed.' if self.lang == "English" else "Fajls Proċessati.")
         self.ui.btn_load_dict.setEnabled(True)
         self.ui.btn_load_source.setEnabled(True)
         self.terminate_threads()
@@ -264,14 +377,10 @@ class AppWindow(QMainWindow, QObject):
         self.ui.btn_process.setEnabled(False)
         self.ui.btn_generate.setEnabled(False)
         self.ui.btn_download_dict.setEnabled(True)
-        self.ui.lbl_loaded_sources.setText('No Sources Loaded.')
-        self.ui.lbl_loaded_dict.setText('No File Loaded.')
-        self.ui.lbl_new.setText('New Words Found')
-        self.ui.lbl_add.setText('Words To Add')
         self.dict_file = None
         self.source_files = []
         self.ui.pb_process.setValue(0)
-        self.ui.lbl_status.setText('Idle')
+        self.do_translate()
 
         app.processEvents()
 
@@ -289,8 +398,13 @@ class AppWindow(QMainWindow, QObject):
         self.ui.lst_add.addItems(self.lst_add)
 
         total_words = len(self.lst_add) + len(self.lst_found)
-        self.ui.lbl_new.setText('New Words Found ({}/{})'.format(len(self.lst_found), total_words))
-        self.ui.lbl_add.setText('Words To Add ({})'.format(len(self.lst_add)))
+
+        if self.lang == "English":
+            self.ui.lbl_new.setText('New Words Found ({}/{})'.format(len(self.lst_found), total_words))
+            self.ui.lbl_add.setText('Words To Add ({})'.format(len(self.lst_add)))
+        else:
+            self.ui.lbl_new.setText('Kliem Ġodda Misjuba ({}/{})'.format(len(self.lst_found), total_words))
+            self.ui.lbl_add.setText('Kliem Biex Jiżdiedu ({})'.format(len(self.lst_add)))
 
         if len(self.lst_add) > 0:
             self.ui.btn_generate.setEnabled(True)
@@ -349,19 +463,29 @@ class AppWindow(QMainWindow, QObject):
         merged_dict.sort()
 
         options = QFileDialog.Options()
-        filename = QFileDialog.getSaveFileName(self, "Choose Dictionary File", "",
-                                               "Dictionary File (*.dic)", options=options)
+
+        title = "Choose Dictionary File" if self.lang == "English" else "Għażel Fajl tad-Dizzjunarju"
+        filter_text = "Dictionary File (*.dic)" if self.lang == "English" else "Fajl tad-Dizzjunarju (*.dic)"
+        filename = QFileDialog.getSaveFileName(self, title, "", filter_text, options=options)
         if filename and filename[0] != '':
             save_file = str(filename[0])
 
-            self.update_status("Writing file, please wait...")
+            if self.lang == "English":
+                write_status = "Writing file, please wait..."
+            else:
+                write_status = "Qed jinkiteb il-Fajl, jekk jgħoġbok stenna..."
+            self.update_status(write_status)
 
             with open(save_file, 'w') as new_dict:
                 new_dict.write("%s\n" % len(merged_dict))
                 for word in merged_dict:
                     new_dict.write("%s\n" % word)
 
-            self.update_status("New dictionary written to {}".format(save_file))
+            if self.lang == "English":
+                result_text = "New dictionary written to {}".format(save_file)
+            else:
+                result_text = "Dizzjunarju ġdid inkiten ġo {}".format(save_file)
+            self.update_status(result_text)
 
     @QtCore.pyqtSlot(str)
     def update_status(self, status: str):
