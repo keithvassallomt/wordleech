@@ -146,8 +146,8 @@ class AppWindow(QMainWindow, QObject):
             self.ui.grp_load.setTitle("Iftaħ Fajls")
             self.ui.lbl_dict_file.setText("Fajl tad-Dizzjunarju")
             self.ui.lbl_source_file.setText("Fajl(s) tas-Sors")
-            self.ui.btn_load_dict.setText("Għażel...")
-            self.ui.btn_load_source.setText("Għażel...")
+            self.ui.btn_load_dict.setText("Agħżel...")
+            self.ui.btn_load_source.setText("Agħżel...")
             self.ui.btn_download_dict.setText("Niżżel l-Aġġornat")
             self.ui.btn_reset.setText("Erġa Ibda")
             self.ui.btn_process.setText("Ipproċessa")
@@ -179,7 +179,7 @@ class AppWindow(QMainWindow, QObject):
 
         options = QFileDialog.Options()
 
-        title = "Choose Dictionary File" if self.lang == "English" else "Għażel Fajl tad-Dizzjunarju"
+        title = "Choose Dictionary File" if self.lang == "English" else "Agħżel Fajl tad-Dizzjunarju"
         filter_text = "Dictionary File (*.dic)" if self.lang == "English" else "Fajl tad-Dizzjunarju (*.dic)"
         filename = QFileDialog.getOpenFileName(self, title, "", filter_text, options=options)
         if filename and filename[0] != '':
@@ -229,7 +229,7 @@ class AppWindow(QMainWindow, QObject):
 
         self.source_files.clear()
         options = QFileDialog.Options()
-        title = "Choose Source Files" if self.lang == "English" else "Għażel Fajls bis-Sorsi"
+        title = "Choose Source Files" if self.lang == "English" else "Agħżel Fajls bis-Sorsi"
         filenames = QFileDialog.getOpenFileNames(self, title, "",
                                                  "Portable Document Format (*.pdf)", options=options)
 
@@ -464,7 +464,7 @@ class AppWindow(QMainWindow, QObject):
 
         options = QFileDialog.Options()
 
-        title = "Choose Dictionary File" if self.lang == "English" else "Għażel Fajl tad-Dizzjunarju"
+        title = "Choose Dictionary File" if self.lang == "English" else "Agħżel Fajl tad-Dizzjunarju"
         filter_text = "Dictionary File (*.dic)" if self.lang == "English" else "Fajl tad-Dizzjunarju (*.dic)"
         filename = QFileDialog.getSaveFileName(self, title, "", filter_text, options=options)
         if filename and filename[0] != '':
